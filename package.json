@@ -1,0 +1,57 @@
+{
+  "name": "mcp-test-timebox",
+  "version": "0.1.0",
+  "description": "タイムボックス付きテスト専用MCPサーバ - テスト実行が終わらない問題を防ぐ",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "mcp-test-timebox": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "test",
+    "timebox",
+    "flutter",
+    "timeout",
+    "test-runner"
+  ],
+  "author": "kawanishi0117",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawanishi0117/mcp-test-timebox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kawanishi0117/mcp-test-timebox/issues"
+  },
+  "homepage": "https://github.com/kawanishi0117/mcp-test-timebox#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "tree-kill": "^1.2.2",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "fast-check": "^4.5.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}
