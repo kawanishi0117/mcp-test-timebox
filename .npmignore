@@ -1,0 +1,19 @@
+# Source files (dist only)
+src/
+tests/
+.kiro/
+docs/
+
+# Config files
+tsconfig.json
+vitest.config.ts
+.gitignore
+
+# Cache and build artifacts
+.cache/
+node_modules/
+*.log
+
+# IDE
+.vscode/
+.idea/

@@ -13,17 +13,33 @@
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
     "test",
     "timebox",
-    "flutter"
+    "flutter",
+    "timeout",
+    "test-runner"
   ],
-  "author": "",
+  "author": "kawanishi0117",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawanishi0117/mcp-test-timebox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kawanishi0117/mcp-test-timebox/issues"
+  },
+  "homepage": "https://github.com/kawanishi0117/mcp-test-timebox#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
