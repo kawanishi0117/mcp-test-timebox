@@ -1,8 +1,10 @@
 # mcp-test-timebox
 
+[![npm version](https://badge.fury.io/js/mcp-test-timebox.svg)](https://www.npmjs.com/package/mcp-test-timebox)
+
 テスト実行の「終わらない／戻ってこない」問題を防ぐ、タイムボックス付きテスト専用MCPサーバ。
 
-## 概要
+## 特徴
 
 - **必ず結果を返す**: ハードタイムアウト・無出力タイムアウトにより、ハングしても必ずレスポンスを返却
 - **安全な実行**: 任意コマンド実行を禁止し、固定テンプレート（`flutter test`等）のみ許可
@@ -10,38 +12,67 @@
 
 ## インストール
 
-### 前提条件
+### npx で直接使用（推奨）
 
-- Node.js 18.0.0 以上
-- npm または yarn
+インストール不要で、MCP設定に追加するだけで使えます。
 
-### インストール手順
+### ローカルインストール
 
 ```bash
-# リポジトリをクローン
-git clone <repository-url>
-cd mcp-test-timebox
+npm install -g mcp-test-timebox
+```
 
-# 依存関係をインストール
-npm install
+## MCP設定
 
-# ビルド
-npm run build
+### Kiro
+
+`.kiro/settings/mcp.json` または `~/.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "mcp-test-timebox": {
+      "command": "npx",
+      "args": ["-y", "mcp-test-timebox"],
+      "disabled": false
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+`claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mcp-test-timebox": {
+      "command": "npx",
+      "args": ["-y", "mcp-test-timebox"]
+    }
+  }
+}
+```
+
+### VS Code (Copilot)
+
+`.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "mcp-test-timebox": {
+      "command": "npx",
+      "args": ["-y", "mcp-test-timebox"]
+    }
+  }
+}
 ```
 
 ## 使用方法
 
-### MCPサーバとして起動
-
-```bash
-# stdio経由でMCPサーバを起動
-npm run start
-
-# または直接実行
-node dist/server.js
-```
-
-### run_test ツールのパラメータ
+### run_test ツール
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
@@ -55,6 +86,7 @@ node dist/server.js
 
 ### 実行例
 
+全テスト実行:
 ```json
 {
   "runner": "flutter",
@@ -65,6 +97,7 @@ node dist/server.js
 }
 ```
 
+特定ファイルのテスト:
 ```json
 {
   "runner": "flutter",
@@ -103,90 +136,34 @@ node dist/server.js
 | `no_output` | 無出力タイムアウト超過 |
 | `error` | バリデーションエラー等 |
 
-## MCP設定例
-
-### Kiro での設定
-
-`.kiro/settings/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "mcp-test-timebox": {
-      "command": "node",
-      "args": ["/path/to/mcp-test-timebox/dist/server.js"],
-      "disabled": false,
-      "autoApprove": []
-    }
-  }
-}
-```
-
-### Claude Desktop での設定
-
-`claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "mcp-test-timebox": {
-      "command": "node",
-      "args": ["/path/to/mcp-test-timebox/dist/server.js"]
-    }
-  }
-}
-```
-
-## 開発
-
-### ビルド
-
-```bash
-npm run build
-```
-
-### テスト実行
-
-```bash
-# 全テスト実行
-npm run test
-
-# ウォッチモード
-npm run test:watch
-
-# カバレッジ付き
-npm run test:coverage
-```
-
-### 開発モード（ウォッチビルド）
-
-```bash
-npm run dev
-```
-
 ## 成果物
 
 テスト実行ごとに以下のファイルが生成されます：
 
 ```
 .cache/mcp-test-timebox/reports/<timestamp>/
-├── raw.log        # stdout/stderrの完全ログ（出力元を区別）
+├── raw.log        # stdout/stderrの完全ログ
 ├── summary.md     # 人間が読みやすい要約
 └── summary.json   # 機械処理用の構造化データ
 ```
 
-### raw.log フォーマット
+## 開発
 
+```bash
+# クローン
+git clone https://github.com/kawanishi0117/mcp-test-timebox.git
+cd mcp-test-timebox
+
+# 依存関係インストール
+npm install
+
+# ビルド
+npm run build
+
+# テスト
+npm test
 ```
-[2026-01-13T12:34:56.789Z] [stdout] Running "flutter test"...
-[2026-01-13T12:34:57.123Z] [stderr] Warning: some warning
-[2026-01-13T12:34:58.456Z] [stdout] ✓ Test passed
-```
-
-## ドキュメント
-
-- [MVP要件](docs/MVP.md) - プロジェクトのMVP仕様
 
 ## ライセンス
 
-MIT License - 詳細は [LICENSE](LICENSE) を参照
+MIT
