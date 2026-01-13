@@ -15,9 +15,12 @@ import { z } from 'zod';
 
 /**
  * 許可されたテストランナー
- * MVPでは flutter のみサポート
+ * - flutter: Flutter/Dartプロジェクト用
+ * - vitest: Vite/Node.jsプロジェクト用（TypeScript/JavaScript）
+ * - pytest: Pythonプロジェクト用
+ * - jest: Node.jsプロジェクト用（TypeScript/JavaScript）
  */
-export const ALLOWED_RUNNERS = ['flutter'] as const;
+export const ALLOWED_RUNNERS = ['flutter', 'vitest', 'pytest', 'jest'] as const;
 export type Runner = typeof ALLOWED_RUNNERS[number];
 
 /**

@@ -35,33 +35,44 @@ const SERVER_INFO = {
  * 注意: MCP SDKはZodObjectではなく、オブジェクトの形状（shape）を期待する
  */
 const runTestInputShape = {
-  /** テストランナー（MVPでは flutter のみ） */
+  /** テストランナー */
   runner: z.enum(ALLOWED_RUNNERS).describe(
-    `テストランナー。許可値: ${ALLOWED_RUNNERS.join(', ')}`
+    `テストランナー。プロジェクトに応じて選択:
+- flutter: Flutter/Dartプロジェクト
+- vitest: Vite/TypeScript/JavaScriptプロジェクト
+- pytest: Pythonプロジェクト
+- jest: Node.js/TypeScript/JavaScriptプロジェクト`
   ),
   /** テスト実行スコープ */
   scope: z.enum(ALLOWED_SCOPES).describe(
-    `テスト実行スコープ。all: 全テスト, file: 特定ファイル, pattern: パターンマッチ`
+    `テスト実行スコープ:
+- all: 全テスト実行（推奨: 初回や全体確認時）
+- file: 特定ファイルのテスト（例: test/widget_test.dart）
+- pattern: テスト名でフィルタ（例: "login"を含むテスト）`
   ),
   /** テスト対象（scope が file/pattern の場合必須） */
   target: z.string().optional().describe(
-    'テスト対象。scope が file または pattern の場合必須'
+    `テスト対象。scopeがfileの場合はファイルパス、patternの場合はテスト名パターン。
+例: "test/unit/auth.test.ts" または "should login"`
   ),
   /** ハードタイムアウト（ミリ秒） */
   timeout_ms: z.number().int().positive().describe(
-    'ハードタイムアウト（ミリ秒）。この時間を超えるとプロセスを強制終了'
+    `ハードタイムアウト（ミリ秒）。推奨値:
+- 単体テスト: 60000（1分）
+- 統合テスト: 300000（5分）
+- E2Eテスト: 600000（10分）`
   ),
   /** 無出力タイムアウト（ミリ秒） */
   no_output_timeout_ms: z.number().int().positive().describe(
-    '無出力タイムアウト（ミリ秒）。この時間出力がないとプロセスを強制終了'
+    `無出力タイムアウト（ミリ秒）。この時間出力がないとハング判定。推奨: 30000〜60000`
   ),
   /** 要約対象の末尾バイト数 */
   max_output_bytes: z.number().int().positive().describe(
-    '要約対象の末尾バイト数。ログ抽出時にこのバイト数を対象とする'
+    `要約対象の末尾バイト数。ログが大きい場合に末尾からこのバイト数を抽出。推奨: 102400（100KB）`
   ),
   /** レポート出力ディレクトリ（相対パス、オプション） */
   report_dir: z.string().optional().describe(
-    'レポート出力ディレクトリ（相対パス）。省略時はデフォルトパスを使用'
+    'レポート出力ディレクトリ（相対パス）。省略時は .cache/mcp-test-timebox/reports/<timestamp> に自動生成'
   ),
 };
 
@@ -92,7 +103,27 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     'run_test',
     {
-      description: 'タイムボックス付きでテストを実行する。固定テンプレート（flutter test等）のみ許可し、実行結果をレポートとして保存する。',
+      description: `タイムボックス付きでテストを実行し、必ず結果を返す。
+
+【用途】
+- テストがハングしても必ずタイムアウトで結果を返す
+- テスト結果をraw.log/summary.md/summary.jsonとして保存
+- AIがテスト結果を解析しやすい形式で出力
+
+【対応ランナー】
+- flutter: Flutter/Dartプロジェクト（flutter test）
+- vitest: Vite/TS/JSプロジェクト（npx vitest run）
+- pytest: Pythonプロジェクト（pytest）
+- jest: Node.js/TS/JSプロジェクト（npx jest）
+
+【推奨パラメータ】
+- timeout_ms: 60000〜300000（1〜5分）
+- no_output_timeout_ms: 30000〜60000（30秒〜1分）
+- max_output_bytes: 102400（100KB）
+
+【レスポンス】
+status: pass/fail/timeout/no_output/error
+excerpt: テスト結果の要約（失敗時はエラー箇所を抽出）`,
       inputSchema: runTestInputShape,
     },
     async (params): Promise<{ content: Array<{ type: 'text'; text: string }> }> => {

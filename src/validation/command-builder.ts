@@ -44,6 +44,7 @@ interface CommandTemplate {
  * runner -> scope -> template のマッピング
  */
 const COMMAND_TEMPLATES: Record<Runner, Record<Scope, CommandTemplate>> = {
+  // Flutter/Dart用
   flutter: {
     all: {
       command: 'flutter',
@@ -59,6 +60,60 @@ const COMMAND_TEMPLATES: Record<Runner, Record<Scope, CommandTemplate>> = {
       baseArgs: ['test'],
       targetArgFormat: 'named',
       targetFlag: '--name',
+    },
+  },
+  // Vitest用（TypeScript/JavaScript）
+  vitest: {
+    all: {
+      command: 'npx',
+      baseArgs: ['vitest', 'run'],
+    },
+    file: {
+      command: 'npx',
+      baseArgs: ['vitest', 'run'],
+      targetArgFormat: 'positional',
+    },
+    pattern: {
+      command: 'npx',
+      baseArgs: ['vitest', 'run'],
+      targetArgFormat: 'named',
+      targetFlag: '-t',
+    },
+  },
+  // Pytest用（Python）
+  pytest: {
+    all: {
+      command: 'pytest',
+      baseArgs: [],
+    },
+    file: {
+      command: 'pytest',
+      baseArgs: [],
+      targetArgFormat: 'positional',
+    },
+    pattern: {
+      command: 'pytest',
+      baseArgs: [],
+      targetArgFormat: 'named',
+      targetFlag: '-k',
+    },
+  },
+  // Jest用（TypeScript/JavaScript）
+  jest: {
+    all: {
+      command: 'npx',
+      baseArgs: ['jest'],
+    },
+    file: {
+      command: 'npx',
+      baseArgs: ['jest'],
+      targetArgFormat: 'positional',
+    },
+    pattern: {
+      command: 'npx',
+      baseArgs: ['jest'],
+      targetArgFormat: 'named',
+      targetFlag: '-t',
     },
   },
 };
@@ -166,37 +221,24 @@ export function formatCommand(result: CommandResult): string {
  * @returns 許可されたパターンの場合 true
  */
 export function isAllowedCommandPattern(command: string, args: string[]): boolean {
-  // flutter test パターンのみ許可
-  if (command !== 'flutter') {
-    return false;
-  }
-
-  if (args.length === 0 || args[0] !== 'test') {
-    return false;
-  }
-
-  // 許可されたパターン:
-  // 1. flutter test
-  // 2. flutter test <target>
-  // 3. flutter test --name <target>
-  
-  if (args.length === 1) {
-    // flutter test
+  // flutter test パターン
+  if (command === 'flutter' && args.length > 0 && args[0] === 'test') {
     return true;
   }
 
-  if (args.length === 2) {
-    // flutter test <target>
-    // targetが--で始まらないこと
-    const arg1 = args[1];
-    return arg1 !== undefined && !arg1.startsWith('--');
+  // npx vitest run パターン
+  if (command === 'npx' && args.length >= 2 && args[0] === 'vitest' && args[1] === 'run') {
+    return true;
   }
 
-  if (args.length === 3) {
-    // flutter test --name <target>
-    const arg1 = args[1];
-    const arg2 = args[2];
-    return arg1 === '--name' && arg2 !== undefined && !arg2.startsWith('--');
+  // npx jest パターン
+  if (command === 'npx' && args.length >= 1 && args[0] === 'jest') {
+    return true;
+  }
+
+  // pytest パターン
+  if (command === 'pytest') {
+    return true;
   }
 
   return false;

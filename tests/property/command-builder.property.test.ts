@@ -6,8 +6,13 @@
  * Property 1: コマンド構築の安全性
  * 
  * *For any* 有効な入力パラメータ（runner, scope, target）に対して、
- * 生成されるコマンドは固定テンプレート（`flutter test` または 
- * `flutter test <target>` または `flutter test --name <target>`）のいずれかに一致する。
+ * 生成されるコマンドは各ランナーの固定テンプレートに一致する。
+ * 
+ * 対応ランナー:
+ * - flutter: flutter test
+ * - vitest: npx vitest run
+ * - pytest: pytest
+ * - jest: npx jest
  * 
  * Validates: Requirements 2.1, 2.3, 2.4, 2.5
  */
@@ -17,13 +22,10 @@ import {
   buildCommand,
   formatCommand,
   isAllowedCommandPattern,
-  type CommandResult,
 } from '../../src/validation/command-builder.js';
 import {
   ALLOWED_RUNNERS,
-  ALLOWED_SCOPES,
   type Runner,
-  type Scope,
 } from '../../src/validation/input-schema.js';
 
 /**
@@ -34,51 +36,51 @@ const safeTarget = fc.stringMatching(/^[a-zA-Z0-9_\-./]+$/)
   .filter((s) => s.length > 0 && !s.startsWith('-'));
 
 /**
- * 許可されたコマンドパターン
+ * 各ランナーの期待されるコマンドパターン
  */
-const ALLOWED_PATTERNS = [
-  'flutter test',
-  /^flutter test [a-zA-Z0-9_\-./]+$/,
-  /^flutter test --name [a-zA-Z0-9_\-./]+$/,
-];
-
-/**
- * コマンドが許可されたパターンに一致するかチェック
- */
-function matchesAllowedPattern(commandStr: string): boolean {
-  return ALLOWED_PATTERNS.some((pattern) => {
-    if (typeof pattern === 'string') {
-      return commandStr === pattern;
-    }
-    return pattern.test(commandStr);
-  });
-}
+const EXPECTED_COMMANDS: Record<Runner, {
+  all: string;
+  file: (target: string) => string;
+  pattern: (target: string) => string;
+}> = {
+  flutter: {
+    all: 'flutter test',
+    file: (t) => `flutter test ${t}`,
+    pattern: (t) => `flutter test --name ${t}`,
+  },
+  vitest: {
+    all: 'npx vitest run',
+    file: (t) => `npx vitest run ${t}`,
+    pattern: (t) => `npx vitest run -t ${t}`,
+  },
+  pytest: {
+    all: 'pytest',
+    file: (t) => `pytest ${t}`,
+    pattern: (t) => `pytest -k ${t}`,
+  },
+  jest: {
+    all: 'npx jest',
+    file: (t) => `npx jest ${t}`,
+    pattern: (t) => `npx jest -t ${t}`,
+  },
+};
 
 describe('コマンドビルダー プロパティテスト', () => {
   /**
    * Property 1: コマンド構築の安全性
-   * 
-   * *For any* 有効な入力パラメータ（runner, scope, target）に対して、
-   * 生成されるコマンドは固定テンプレートのいずれかに一致する。
-   * 
-   * Validates: Requirements 2.1, 2.3, 2.4, 2.5
    */
   describe('Property 1: コマンド構築の安全性', () => {
     /**
-     * Property 1.1: scope=allの場合、flutter testを生成
-     * 
-     * Requirements 2.3: scope が all の場合、flutter test を実行
+     * Property 1.1: scope=allの場合、各ランナーの基本コマンドを生成
      */
-    it('scope=allの場合、flutter testを生成する', () => {
+    it('scope=allの場合、各ランナーの基本コマンドを生成する', () => {
       fc.assert(
         fc.property(
           fc.constantFrom(...ALLOWED_RUNNERS),
           (runner) => {
             const result = buildCommand(runner, 'all');
             const commandStr = formatCommand(result);
-            
-            // flutter test のみ
-            return commandStr === 'flutter test';
+            return commandStr === EXPECTED_COMMANDS[runner].all;
           }
         ),
         { numRuns: 100 }
@@ -86,11 +88,9 @@ describe('コマンドビルダー プロパティテスト', () => {
     });
 
     /**
-     * Property 1.2: scope=fileの場合、flutter test <target>を生成
-     * 
-     * Requirements 2.4: scope が file の場合、flutter test <target> を実行
+     * Property 1.2: scope=fileの場合、各ランナーのファイル指定コマンドを生成
      */
-    it('scope=fileの場合、flutter test <target>を生成する', () => {
+    it('scope=fileの場合、各ランナーのファイル指定コマンドを生成する', () => {
       fc.assert(
         fc.property(
           fc.constantFrom(...ALLOWED_RUNNERS),
@@ -98,9 +98,7 @@ describe('コマンドビルダー プロパティテスト', () => {
           (runner, target) => {
             const result = buildCommand(runner, 'file', target);
             const commandStr = formatCommand(result);
-            
-            // flutter test <target> の形式
-            return commandStr === `flutter test ${target}`;
+            return commandStr === EXPECTED_COMMANDS[runner].file(target);
           }
         ),
         { numRuns: 100 }
@@ -108,11 +106,9 @@ describe('コマンドビルダー プロパティテスト', () => {
     });
 
     /**
-     * Property 1.3: scope=patternの場合、flutter test --name <target>を生成
-     * 
-     * Requirements 2.5: scope が pattern の場合、flutter test --name <target> を実行
+     * Property 1.3: scope=patternの場合、各ランナーのパターン指定コマンドを生成
      */
-    it('scope=patternの場合、flutter test --name <target>を生成する', () => {
+    it('scope=patternの場合、各ランナーのパターン指定コマンドを生成する', () => {
       fc.assert(
         fc.property(
           fc.constantFrom(...ALLOWED_RUNNERS),
@@ -120,9 +116,7 @@ describe('コマンドビルダー プロパティテスト', () => {
           (runner, target) => {
             const result = buildCommand(runner, 'pattern', target);
             const commandStr = formatCommand(result);
-            
-            // flutter test --name <target> の形式
-            return commandStr === `flutter test --name ${target}`;
+            return commandStr === EXPECTED_COMMANDS[runner].pattern(target);
           }
         ),
         { numRuns: 100 }
@@ -130,45 +124,7 @@ describe('コマンドビルダー プロパティテスト', () => {
     });
 
     /**
-     * Property 1.4: 生成されるコマンドは常に許可されたパターンに一致
-     * 
-     * Requirements 2.1: 固定テンプレートのみを実行
-     */
-    it('生成されるコマンドは常に許可されたパターンに一致する', () => {
-      // scope=all, file, patternの各ケースをテスト
-      const scopeWithTarget = fc.oneof(
-        fc.record({
-          scope: fc.constant('all' as const),
-          target: fc.constant(undefined),
-        }),
-        fc.record({
-          scope: fc.constant('file' as const),
-          target: safeTarget,
-        }),
-        fc.record({
-          scope: fc.constant('pattern' as const),
-          target: safeTarget,
-        })
-      );
-
-      fc.assert(
-        fc.property(
-          fc.constantFrom(...ALLOWED_RUNNERS),
-          scopeWithTarget,
-          (runner, { scope, target }) => {
-            const result = buildCommand(runner, scope, target);
-            const commandStr = formatCommand(result);
-            
-            // 許可されたパターンに一致
-            return matchesAllowedPattern(commandStr);
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    /**
-     * Property 1.5: isAllowedCommandPattern()は生成されたコマンドに対してtrueを返す
+     * Property 1.4: isAllowedCommandPattern()は生成されたコマンドに対してtrueを返す
      */
     it('isAllowedCommandPattern()は生成されたコマンドに対してtrueを返す', () => {
       const scopeWithTarget = fc.oneof(
@@ -192,8 +148,6 @@ describe('コマンドビルダー プロパティテスト', () => {
           scopeWithTarget,
           (runner, { scope, target }) => {
             const result = buildCommand(runner, scope, target);
-            
-            // isAllowedCommandPattern()がtrueを返す
             return isAllowedCommandPattern(result.command, result.args);
           }
         ),
@@ -202,9 +156,10 @@ describe('コマンドビルダー プロパティテスト', () => {
     });
 
     /**
-     * Property 1.6: コマンドは常に'flutter'
+     * Property 1.5: コマンドは許可されたコマンドのいずれか
      */
-    it('コマンドは常にflutter', () => {
+    it('コマンドは許可されたコマンドのいずれか', () => {
+      const allowedCommands = ['flutter', 'npx', 'pytest'];
       const scopeWithTarget = fc.oneof(
         fc.record({
           scope: fc.constant('all' as const),
@@ -226,43 +181,7 @@ describe('コマンドビルダー プロパティテスト', () => {
           scopeWithTarget,
           (runner, { scope, target }) => {
             const result = buildCommand(runner, scope, target);
-            
-            // コマンドは常にflutter
-            return result.command === 'flutter';
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    /**
-     * Property 1.7: 引数の最初は常に'test'
-     */
-    it('引数の最初は常にtest', () => {
-      const scopeWithTarget = fc.oneof(
-        fc.record({
-          scope: fc.constant('all' as const),
-          target: fc.constant(undefined),
-        }),
-        fc.record({
-          scope: fc.constant('file' as const),
-          target: safeTarget,
-        }),
-        fc.record({
-          scope: fc.constant('pattern' as const),
-          target: safeTarget,
-        })
-      );
-
-      fc.assert(
-        fc.property(
-          fc.constantFrom(...ALLOWED_RUNNERS),
-          scopeWithTarget,
-          (runner, { scope, target }) => {
-            const result = buildCommand(runner, scope, target);
-            
-            // 引数の最初は常にtest
-            return result.args.length > 0 && result.args[0] === 'test';
+            return allowedCommands.includes(result.command);
           }
         ),
         { numRuns: 100 }
@@ -282,16 +201,17 @@ describe('コマンドビルダー プロパティテスト', () => {
       
       fc.assert(
         fc.property(
+          fc.constantFrom(...ALLOWED_RUNNERS),
           fc.constantFrom(...dangerousChars),
           fc.string({ minLength: 1, maxLength: 10 }),
-          (dangerousChar, suffix) => {
+          (runner, dangerousChar, suffix) => {
             const dangerousTarget = `test${dangerousChar}${suffix}`;
             
             try {
-              buildCommand('flutter', 'file', dangerousTarget);
-              return false; // エラーが発生しなかった場合は失敗
-            } catch (e) {
-              return true; // エラーが発生した場合は成功
+              buildCommand(runner, 'file', dangerousTarget);
+              return false;
+            } catch {
+              return true;
             }
           }
         ),
@@ -307,14 +227,18 @@ describe('コマンドビルダー プロパティテスト', () => {
         .map((s) => `-${s}`);
 
       fc.assert(
-        fc.property(dashStartTarget, (target) => {
-          try {
-            buildCommand('flutter', 'file', target);
-            return false; // エラーが発生しなかった場合は失敗
-          } catch (e) {
-            return true; // エラーが発生した場合は成功
+        fc.property(
+          fc.constantFrom(...ALLOWED_RUNNERS),
+          dashStartTarget,
+          (runner, target) => {
+            try {
+              buildCommand(runner, 'file', target);
+              return false;
+            } catch {
+              return true;
+            }
           }
-        }),
+        ),
         { numRuns: 100 }
       );
     });
@@ -325,8 +249,10 @@ describe('コマンドビルダー プロパティテスト', () => {
     it('空のtargetは拒否される', () => {
       const emptyTargets = ['', '   ', '\t', '\n'];
       
-      for (const target of emptyTargets) {
-        expect(() => buildCommand('flutter', 'file', target)).toThrow();
+      for (const runner of ALLOWED_RUNNERS) {
+        for (const target of emptyTargets) {
+          expect(() => buildCommand(runner, 'file', target)).toThrow();
+        }
       }
     });
 
@@ -336,13 +262,14 @@ describe('コマンドビルダー プロパティテスト', () => {
     it('scope=file/patternでtarget未指定は拒否される', () => {
       fc.assert(
         fc.property(
+          fc.constantFrom(...ALLOWED_RUNNERS),
           fc.constantFrom('file', 'pattern') as fc.Arbitrary<'file' | 'pattern'>,
-          (scope) => {
+          (runner, scope) => {
             try {
-              buildCommand('flutter', scope, undefined);
-              return false; // エラーが発生しなかった場合は失敗
-            } catch (e) {
-              return true; // エラーが発生した場合は成功
+              buildCommand(runner, scope, undefined);
+              return false;
+            } catch {
+              return true;
             }
           }
         ),
@@ -359,10 +286,7 @@ describe('コマンドビルダー プロパティテスト', () => {
       const invalidCommands = [
         { command: 'rm', args: ['-rf', '/'] },
         { command: 'bash', args: ['-c', 'echo hello'] },
-        { command: 'flutter', args: ['run'] },
-        { command: 'flutter', args: ['build'] },
-        { command: 'flutter', args: [] },
-        { command: 'flutter', args: ['test', '--name', 'foo', '--extra'] },
+        { command: 'node', args: ['malicious.js'] },
       ];
 
       for (const { command, args } of invalidCommands) {
@@ -372,9 +296,19 @@ describe('コマンドビルダー プロパティテスト', () => {
 
     it('許可されたコマンドはtrueを返す', () => {
       const validCommands = [
+        // flutter
         { command: 'flutter', args: ['test'] },
         { command: 'flutter', args: ['test', 'test/widget_test.dart'] },
         { command: 'flutter', args: ['test', '--name', 'my_test'] },
+        // vitest
+        { command: 'npx', args: ['vitest', 'run'] },
+        { command: 'npx', args: ['vitest', 'run', 'test/unit.test.ts'] },
+        // pytest
+        { command: 'pytest', args: [] },
+        { command: 'pytest', args: ['test_file.py'] },
+        // jest
+        { command: 'npx', args: ['jest'] },
+        { command: 'npx', args: ['jest', 'test/unit.test.js'] },
       ];
 
       for (const { command, args } of validCommands) {

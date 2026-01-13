@@ -82,19 +82,28 @@
 
 ---
 
-## 入力仕様（MVP）
+## 入力仕様
 
 `run_test` の入力パラメータ：
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `runner` | string | ✓ | `flutter`（MVPはこれだけでも良い） |
+| `runner` | string | ✓ | `flutter`, `vitest`, `pytest`, `jest` |
 | `scope` | string | ✓ | `all` / `file` / `pattern` |
 | `target` | string | △ | scope に応じて（ファイルパス or テスト名パターン） |
 | `timeout_ms` | number | ✓ | ハードタイムアウト（ミリ秒） |
 | `no_output_timeout_ms` | number | ✓ | 無出力タイムアウト（ミリ秒） |
 | `max_output_bytes` | number | ✓ | 要約に使う末尾バッファ上限 |
 | `report_dir` | string | - | 相対パスのみ |
+
+### 対応ランナー
+
+| ランナー | コマンド | 用途 |
+|---------|---------|------|
+| `flutter` | `flutter test` | Flutter/Dartプロジェクト |
+| `vitest` | `npx vitest run` | Vite/TypeScript/JavaScriptプロジェクト |
+| `pytest` | `pytest` | Pythonプロジェクト |
+| `jest` | `npx jest` | Node.js/TypeScript/JavaScriptプロジェクト |
 
 ---
 

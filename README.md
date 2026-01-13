@@ -7,8 +7,18 @@
 ## 特徴
 
 - **必ず結果を返す**: ハードタイムアウト・無出力タイムアウトにより、ハングしても必ずレスポンスを返却
-- **安全な実行**: 任意コマンド実行を禁止し、固定テンプレート（`flutter test`等）のみ許可
+- **安全な実行**: 任意コマンド実行を禁止し、固定テンプレートのみ許可
 - **成果物の保存**: 実行ごとに `raw.log` / `summary.md` / `summary.json` を生成
+- **複数ランナー対応**: Flutter, Vitest, Pytest, Jest をサポート
+
+## 対応テストランナー
+
+| ランナー | 言語/フレームワーク | コマンド |
+|---------|-------------------|---------|
+| `flutter` | Flutter/Dart | `flutter test` |
+| `vitest` | Vite/TypeScript/JavaScript | `npx vitest run` |
+| `pytest` | Python | `pytest` |
+| `jest` | Node.js/TypeScript/JavaScript | `npx jest` |
 
 ## インストール
 
@@ -16,7 +26,7 @@
 
 インストール不要で、MCP設定に追加するだけで使えます。
 
-### ローカルインストール
+### グローバルインストール
 
 ```bash
 npm install -g mcp-test-timebox
@@ -34,7 +44,8 @@ npm install -g mcp-test-timebox
     "mcp-test-timebox": {
       "command": "npx",
       "args": ["-y", "mcp-test-timebox"],
-      "disabled": false
+      "disabled": false,
+      "autoApprove": ["run_test"]
     }
   }
 }
@@ -76,7 +87,7 @@ npm install -g mcp-test-timebox
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `runner` | string | ✓ | テストランナー（現在は `flutter` のみ） |
+| `runner` | string | ✓ | テストランナー: `flutter`, `vitest`, `pytest`, `jest` |
 | `scope` | string | ✓ | 実行スコープ: `all`, `file`, `pattern` |
 | `target` | string | △ | `scope` が `file` または `pattern` の場合に必須 |
 | `timeout_ms` | number | ✓ | ハードタイムアウト（ミリ秒） |
@@ -84,9 +95,17 @@ npm install -g mcp-test-timebox
 | `max_output_bytes` | number | ✓ | 要約対象の末尾バイト数 |
 | `report_dir` | string | - | レポート出力先（省略時は自動生成） |
 
+### 推奨パラメータ値
+
+| パラメータ | 推奨値 | 説明 |
+|-----------|--------|------|
+| `timeout_ms` | 60000〜300000 | 1〜5分（テスト規模に応じて調整） |
+| `no_output_timeout_ms` | 30000〜60000 | 30秒〜1分 |
+| `max_output_bytes` | 102400 | 100KB |
+
 ### 実行例
 
-全テスト実行:
+#### Flutter - 全テスト
 ```json
 {
   "runner": "flutter",
@@ -97,13 +116,36 @@ npm install -g mcp-test-timebox
 }
 ```
 
-特定ファイルのテスト:
+#### Vitest - 特定ファイル
 ```json
 {
-  "runner": "flutter",
+  "runner": "vitest",
   "scope": "file",
-  "target": "test/widget_test.dart",
-  "timeout_ms": 300000,
+  "target": "tests/unit/auth.test.ts",
+  "timeout_ms": 60000,
+  "no_output_timeout_ms": 30000,
+  "max_output_bytes": 102400
+}
+```
+
+#### Pytest - パターンマッチ
+```json
+{
+  "runner": "pytest",
+  "scope": "pattern",
+  "target": "test_login",
+  "timeout_ms": 120000,
+  "no_output_timeout_ms": 30000,
+  "max_output_bytes": 102400
+}
+```
+
+#### Jest - 全テスト
+```json
+{
+  "runner": "jest",
+  "scope": "all",
+  "timeout_ms": 180000,
   "no_output_timeout_ms": 60000,
   "max_output_bytes": 102400
 }

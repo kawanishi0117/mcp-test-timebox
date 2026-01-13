@@ -21,9 +21,12 @@
     "model-context-protocol",
     "test",
     "timebox",
-    "flutter",
     "timeout",
-    "test-runner"
+    "test-runner",
+    "flutter",
+    "vitest",
+    "pytest",
+    "jest"
   ],
   "author": "kawanishi0117",
   "license": "MIT",
