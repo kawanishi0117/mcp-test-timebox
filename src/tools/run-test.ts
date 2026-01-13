@@ -9,6 +9,7 @@
  * - 6.1-6.5: MCPレスポンスの必須フィールド
  */
 
+import { resolve } from 'node:path';
 import { validateRunTestInput, type RunTestInput } from '../validation/input-schema.js';
 import { buildCommand, formatCommand } from '../validation/command-builder.js';
 import { createProcessExecutor, type ProcessResult, type LogEntry } from '../executor/process-executor.js';
@@ -120,6 +121,7 @@ export class RunTestTool {
 
     // 3. report_dirパスの検証（指定されている場合）
     // 指定がない場合は cwd 配下のデフォルトパスを使用
+    // 絶対パスに変換して返す
     let reportDirBase: string;
     if (validInput.report_dir) {
       const pathResult = normalizePath(validInput.report_dir, workingDir);
@@ -129,10 +131,11 @@ export class RunTestTool {
           `レポートディレクトリパス検証エラー: ${pathResult.error}`
         );
       }
-      reportDirBase = validInput.report_dir;
+      // 絶対パスに変換
+      reportDirBase = resolve(workingDir, validInput.report_dir);
     } else {
-      // デフォルトは cwd 配下の .cache/mcp-test-timebox/reports
-      reportDirBase = `${workingDir}/.cache/mcp-test-timebox/reports`;
+      // デフォルトは cwd 配下の .cache/mcp-test-timebox/reports（絶対パス）
+      reportDirBase = resolve(workingDir, '.cache/mcp-test-timebox/reports');
     }
 
     // 4. コマンド構築
