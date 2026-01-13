@@ -74,6 +74,10 @@ const runTestInputShape = {
   report_dir: z.string().optional().describe(
     'レポート出力ディレクトリ（相対パス）。省略時は .cache/mcp-test-timebox/reports/<timestamp> に自動生成'
   ),
+  /** 作業ディレクトリ（絶対パス、オプション） */
+  cwd: z.string().optional().describe(
+    'テスト実行の作業ディレクトリ（絶対パス）。省略時はMCPサーバの起動ディレクトリを使用。ワークスペースのルートパスを指定してください。'
+  ),
 };
 
 /**

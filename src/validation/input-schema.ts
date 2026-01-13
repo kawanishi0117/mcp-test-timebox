@@ -67,6 +67,9 @@ const baseRunTestInputSchema = z.object({
 
   /** レポート出力ディレクトリ（相対パス、オプション） */
   report_dir: z.string().optional(),
+
+  /** 作業ディレクトリ（絶対パス、オプション） */
+  cwd: z.string().optional(),
 });
 
 /**
