@@ -174,11 +174,8 @@ export async function startServer(): Promise<void> {
 
 // メインエントリポイント
 // このファイルが直接実行された場合にサーバを起動
-// ESMではimport.meta.urlを使用してメインモジュールかどうかを判定
-const isMainModule = import.meta.url === `file://${process.argv[1]}`;
-if (isMainModule) {
-  startServer().catch((error) => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
-}
+// 常にサーバを起動する（CLIツールとして使用されるため）
+startServer().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
