@@ -143,6 +143,7 @@ describe('MCPサーバ統合テスト', () => {
           timeout_ms: 500,
           no_output_timeout_ms: 300,
           max_output_bytes: 10000,
+          cwd: testTmpDir,
         },
       });
 
@@ -201,6 +202,7 @@ describe('MCPサーバ統合テスト', () => {
             timeout_ms: 1000,
             no_output_timeout_ms: 1000,
             max_output_bytes: 10000,
+            cwd: testTmpDir,
           },
         });
 
@@ -252,6 +254,7 @@ describe('MCPサーバ統合テスト', () => {
           name: 'run_test',
           arguments: {
             runner: 'flutter',
+            cwd: testTmpDir,
             // scope, timeout_ms, no_output_timeout_ms, max_output_bytes が欠落
           },
         });
@@ -306,6 +309,7 @@ describe('MCPサーバ統合テスト', () => {
           timeout_ms: 1000,
           no_output_timeout_ms: 1000,
           max_output_bytes: 10000,
+          cwd: testTmpDir,
         },
       });
 

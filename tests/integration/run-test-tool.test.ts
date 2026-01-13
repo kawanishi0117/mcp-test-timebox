@@ -46,6 +46,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 500,
         no_output_timeout_ms: 300,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       // レスポンスの構造を確認
@@ -73,6 +74,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 500,
         no_output_timeout_ms: 300,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       // flutterがない場合はerror、ある場合はfail
@@ -91,6 +93,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 50, // 50ms
         no_output_timeout_ms: 10000, // 無出力タイムアウトは長めに
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       // タイムアウトまたはエラー（flutterがない場合）
@@ -113,6 +116,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 10000, // ハードタイムアウトは長めに
         no_output_timeout_ms: 50, // 50ms
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       // 無出力タイムアウトまたはエラー（flutterがない場合）
@@ -130,6 +134,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 1000,
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -146,6 +151,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 1000,
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -163,6 +169,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 1000,
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -179,6 +186,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: -100,
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -190,6 +198,7 @@ describe('RunTestTool 統合テスト', () => {
       
       const result = await tool.execute({
         runner: 'flutter',
+        cwd: testTmpDir,
         // scope, timeout_ms, no_output_timeout_ms, max_output_bytes が欠落
       });
 
@@ -207,6 +216,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 1000,
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -224,6 +234,7 @@ describe('RunTestTool 統合テスト', () => {
         no_output_timeout_ms: 1000,
         max_output_bytes: 10000,
         report_dir: '../../../tmp/reports', // リポジトリ外
+        cwd: testTmpDir,
       });
 
       expect(result.status).toBe('error');
@@ -242,6 +253,7 @@ describe('RunTestTool 統合テスト', () => {
         timeout_ms: 500,
         no_output_timeout_ms: 300,
         max_output_bytes: 10000,
+        cwd: testTmpDir,
       });
 
       // エラーでない場合、成果物が生成される

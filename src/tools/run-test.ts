@@ -104,8 +104,8 @@ export class RunTestTool {
 
     const validInput = validationResult.data;
 
-    // cwdが指定されている場合はそれを使用、なければrepoRootを使用
-    const workingDir = validInput.cwd || this.repoRoot;
+    // cwdは必須パラメータ
+    const workingDir = validInput.cwd;
 
     // 2. targetパスの検証（scope が file/pattern の場合）
     if (validInput.target) {

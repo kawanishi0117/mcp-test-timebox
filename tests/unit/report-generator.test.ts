@@ -60,9 +60,10 @@ describe('ReportGenerator ユニットテスト', () => {
 
         const reportDir = await generator.createReportDir(basePath);
 
-        // ディレクトリ名がタイムスタンプ形式（YYYYMMDD-HHMMSS）
+        // ディレクトリ名がタイムスタンプ形式（YYYYMMDD-HHMMSS-mmm-xxxx）
+        // ミリ秒とランダム文字列を含めて一意性を保証
         const dirName = reportDir.split(/[/\\]/).pop();
-        expect(dirName).toMatch(/^\d{8}-\d{6}$/);
+        expect(dirName).toMatch(/^\d{8}-\d{6}-\d{3}-[a-z0-9]{4}$/);
       });
     });
 

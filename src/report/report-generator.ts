@@ -126,8 +126,9 @@ function formatTimestamp(timestamp: number): string {
 
 /**
  * タイムスタンプをディレクトリ名用にフォーマットする
+ * ミリ秒とランダム文字列を含めて一意性を保証する
  * 
- * @returns ディレクトリ名用の文字列（例: 20260113-123456）
+ * @returns ディレクトリ名用の文字列（例: 20260113-123456-789-abc）
  */
 function generateTimestampDirName(): string {
   const now = new Date();
@@ -137,8 +138,12 @@ function generateTimestampDirName(): string {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   const seconds = String(now.getSeconds()).padStart(2, '0');
+  const millis = String(now.getMilliseconds()).padStart(3, '0');
   
-  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+  // ランダム文字列を追加して一意性を保証
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  
+  return `${year}${month}${day}-${hours}${minutes}${seconds}-${millis}-${randomSuffix}`;
 }
 
 /**

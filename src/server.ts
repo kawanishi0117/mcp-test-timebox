@@ -74,9 +74,9 @@ const runTestInputShape = {
   report_dir: z.string().optional().describe(
     'レポート出力ディレクトリ（相対パス）。省略時は .cache/mcp-test-timebox/reports/<timestamp> に自動生成'
   ),
-  /** 作業ディレクトリ（絶対パス、オプション） */
-  cwd: z.string().optional().describe(
-    'テスト実行の作業ディレクトリ（絶対パス）。省略時はMCPサーバの起動ディレクトリを使用。ワークスペースのルートパスを指定してください。'
+  /** 作業ディレクトリ（絶対パス、必須） */
+  cwd: z.string().describe(
+    'テスト実行の作業ディレクトリ（絶対パス）。ワークスペースのルートパスを指定してください。'
   ),
 };
 
@@ -124,7 +124,7 @@ export function createMcpServer(): McpServer {
 - timeout_ms: 60000〜300000（1〜5分）
 - no_output_timeout_ms: 30000〜60000（30秒〜1分）
 - max_output_bytes: 102400（100KB）
-- cwd: ワークスペースのルートパス（絶対パス）
+- cwd: ワークスペースのルートパス（絶対パス）※必須
 
 【レスポンス】
 status: pass/fail/timeout/no_output/error

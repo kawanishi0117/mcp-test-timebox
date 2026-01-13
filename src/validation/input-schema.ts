@@ -68,8 +68,10 @@ const baseRunTestInputSchema = z.object({
   /** レポート出力ディレクトリ（相対パス、オプション） */
   report_dir: z.string().optional(),
 
-  /** 作業ディレクトリ（絶対パス、オプション） */
-  cwd: z.string().optional(),
+  /** 作業ディレクトリ（絶対パス、必須） */
+  cwd: z.string({
+    error: 'cwdは必須です。ワークスペースのルートパス（絶対パス）を指定してください。',
+  }),
 });
 
 /**

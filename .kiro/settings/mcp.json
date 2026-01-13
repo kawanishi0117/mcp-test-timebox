@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mcp-test-timebox": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-test-timebox"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "run_test"
+      ]
+    }
+  }
+}

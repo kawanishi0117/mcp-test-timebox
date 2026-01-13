@@ -32,6 +32,7 @@ const validRunTestInput = (): fc.Arbitrary<RunTestInput> => {
     no_output_timeout_ms: fc.integer({ min: 1, max: 3600000 }),
     max_output_bytes: fc.integer({ min: 1, max: 10000000 }),
     report_dir: fc.option(fc.string({ minLength: 1 }), { nil: undefined }),
+    cwd: fc.string({ minLength: 1 }), // 必須パラメータ
   }).filter((input) => {
     // scope が file/pattern の場合は target が必須
     if ((input.scope === 'file' || input.scope === 'pattern') && !input.target) {
@@ -72,13 +73,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (runner, timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (runner, timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner,
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -131,13 +134,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               // runner未指定
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -154,13 +159,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               // scope未指定
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -181,13 +188,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (scope, timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (scope, timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope,
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -203,13 +212,15 @@ describe('入力バリデーション プロパティテスト', () => {
         fc.property(
           positiveInt,
           positiveInt,
-          (no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               // timeout_ms未指定
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -226,13 +237,15 @@ describe('入力バリデーション プロパティテスト', () => {
           nonPositiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -248,13 +261,15 @@ describe('入力バリデーション プロパティテスト', () => {
         fc.property(
           positiveInt,
           positiveInt,
-          (timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               timeout_ms,
               // no_output_timeout_ms未指定
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -271,13 +286,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           nonPositiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -293,13 +310,15 @@ describe('入力バリデーション プロパティテスト', () => {
         fc.property(
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               // max_output_bytes未指定
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -316,13 +335,15 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           nonPositiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -359,7 +380,8 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'file',
@@ -367,6 +389,7 @@ describe('入力バリデーション プロパティテスト', () => {
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -383,7 +406,8 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'pattern',
@@ -391,6 +415,7 @@ describe('入力バリデーション プロパティテスト', () => {
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -407,7 +432,8 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          fc.string({ minLength: 1 }),
+          (timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope: 'all',
@@ -415,6 +441,7 @@ describe('入力バリデーション プロパティテスト', () => {
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
@@ -436,7 +463,8 @@ describe('入力バリデーション プロパティテスト', () => {
           positiveInt,
           positiveInt,
           positiveInt,
-          (scope, target, timeout_ms, no_output_timeout_ms, max_output_bytes) => {
+          nonEmptyString,
+          (scope, target, timeout_ms, no_output_timeout_ms, max_output_bytes, cwd) => {
             const input = {
               runner: 'flutter',
               scope,
@@ -444,6 +472,7 @@ describe('入力バリデーション プロパティテスト', () => {
               timeout_ms,
               no_output_timeout_ms,
               max_output_bytes,
+              cwd,
             };
 
             const result = validateRunTestInput(input);
