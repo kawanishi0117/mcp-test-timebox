@@ -119,7 +119,8 @@ export class RunTestTool {
     }
 
     // 3. report_dirパスの検証（指定されている場合）
-    let reportDirBase: string | undefined;
+    // 指定がない場合は cwd 配下のデフォルトパスを使用
+    let reportDirBase: string;
     if (validInput.report_dir) {
       const pathResult = normalizePath(validInput.report_dir, workingDir);
       if (!pathResult.valid) {
@@ -129,6 +130,9 @@ export class RunTestTool {
         );
       }
       reportDirBase = validInput.report_dir;
+    } else {
+      // デフォルトは cwd 配下の .cache/mcp-test-timebox/reports
+      reportDirBase = `${workingDir}/.cache/mcp-test-timebox/reports`;
     }
 
     // 4. コマンド構築
