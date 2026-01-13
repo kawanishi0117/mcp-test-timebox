@@ -170,6 +170,21 @@ function getStatusEmoji(status: string): string {
 }
 
 /**
+ * ANSIエスケープシーケンスを除去する
+ * 
+ * @param text - 入力テキスト
+ * @returns ANSIコードを除去したテキスト
+ */
+function stripAnsi(text: string): string {
+  // ANSIエスケープシーケンスのパターン
+  // ESC[ ... m (SGR - Select Graphic Rendition)
+  // ESC[ ... その他の制御シーケンス
+  // eslint-disable-next-line no-control-regex
+  const ansiPattern = /\x1B\[[0-9;]*[A-Za-z]/g;
+  return text.replace(ansiPattern, '');
+}
+
+/**
  * ミリ秒を人間が読みやすい形式に変換する
  * 
  * @param ms - ミリ秒
@@ -301,22 +316,22 @@ export class ReportGenerator implements IReportGenerator {
       '',
     ];
     
-    // 抜粋ブロック
+    // 抜粋ブロック（ANSIエスケープシーケンスを除去）
     if (summary.excerpts.length > 0) {
       sections.push(`## Excerpts`);
       sections.push('');
       sections.push('```');
-      sections.push(...summary.excerpts);
+      sections.push(...summary.excerpts.map(stripAnsi));
       sections.push('```');
       sections.push('');
     }
     
-    // 末尾N行
+    // 末尾N行（ANSIエスケープシーケンスを除去）
     if (summary.tailLines.length > 0) {
       sections.push(`## Tail Lines`);
       sections.push('');
       sections.push('```');
-      sections.push(...summary.tailLines);
+      sections.push(...summary.tailLines.map(stripAnsi));
       sections.push('```');
       sections.push('');
     }
@@ -339,14 +354,15 @@ export class ReportGenerator implements IReportGenerator {
     
     // JSON形式で要約を生成（Requirements 5.4）
     // 必須フィールド: command, exit_code, status, duration_ms, excerpts, tail_lines
+    // ANSIエスケープシーケンスを除去して保存
     const jsonContent = {
       command: `${summary.command} ${summary.args.join(' ')}`.trim(),
       args: summary.args,
       status: summary.status,
       exit_code: summary.exitCode,
       duration_ms: summary.durationMs,
-      excerpts: summary.excerpts,
-      tail_lines: summary.tailLines,
+      excerpts: summary.excerpts.map(stripAnsi),
+      tail_lines: summary.tailLines.map(stripAnsi),
       generated_at: new Date().toISOString(),
     };
     
