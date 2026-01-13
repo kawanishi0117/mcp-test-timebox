@@ -124,6 +124,7 @@ export function createMcpServer(): McpServer {
 - timeout_ms: 60000〜300000（1〜5分）
 - no_output_timeout_ms: 30000〜60000（30秒〜1分）
 - max_output_bytes: 102400（100KB）
+- cwd: ワークスペースのルートパス（絶対パス）
 
 【レスポンス】
 status: pass/fail/timeout/no_output/error

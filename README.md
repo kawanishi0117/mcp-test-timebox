@@ -94,6 +94,7 @@ npm install -g mcp-test-timebox
 | `no_output_timeout_ms` | number | ✓ | 無出力タイムアウト（ミリ秒） |
 | `max_output_bytes` | number | ✓ | 要約対象の末尾バイト数 |
 | `report_dir` | string | - | レポート出力先（省略時は自動生成） |
+| `cwd` | string | - | 作業ディレクトリ（絶対パス、省略時はMCPサーバの起動ディレクトリ） |
 
 ### 推奨パラメータ値
 
@@ -112,7 +113,8 @@ npm install -g mcp-test-timebox
   "scope": "all",
   "timeout_ms": 300000,
   "no_output_timeout_ms": 60000,
-  "max_output_bytes": 102400
+  "max_output_bytes": 102400,
+  "cwd": "/path/to/your/project"
 }
 ```
 
@@ -124,7 +126,8 @@ npm install -g mcp-test-timebox
   "target": "tests/unit/auth.test.ts",
   "timeout_ms": 60000,
   "no_output_timeout_ms": 30000,
-  "max_output_bytes": 102400
+  "max_output_bytes": 102400,
+  "cwd": "/path/to/your/project"
 }
 ```
 
