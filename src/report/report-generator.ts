@@ -16,6 +16,7 @@
 import { mkdir, writeFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { LogEntry } from '../executor/process-executor.js';
+import { stripAnsi } from './log-extractor.js';
 
 /**
  * 保持するレポートの最大数
@@ -167,21 +168,6 @@ function getStatusEmoji(status: string): string {
     default:
       return '❓';
   }
-}
-
-/**
- * ANSIエスケープシーケンスを除去する
- * 
- * @param text - 入力テキスト
- * @returns ANSIコードを除去したテキスト
- */
-function stripAnsi(text: string): string {
-  // ANSIエスケープシーケンスのパターン
-  // ESC[ ... m (SGR - Select Graphic Rendition)
-  // ESC[ ... その他の制御シーケンス
-  // eslint-disable-next-line no-control-regex
-  const ansiPattern = /\x1B\[[0-9;]*[A-Za-z]/g;
-  return text.replace(ansiPattern, '');
 }
 
 /**

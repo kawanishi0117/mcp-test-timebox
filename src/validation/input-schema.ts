@@ -12,16 +12,10 @@
  * - 7.6: max_output_bytes が未指定または正の整数でない場合エラー
  */
 import { z } from 'zod';
+import { ALLOWED_RUNNERS, isAllowedRunner, type Runner } from '../runners/index.js';
 
-/**
- * 許可されたテストランナー
- * - flutter: Flutter/Dartプロジェクト用
- * - vitest: Vite/Node.jsプロジェクト用（TypeScript/JavaScript）
- * - pytest: Pythonプロジェクト用
- * - jest: Node.jsプロジェクト用（TypeScript/JavaScript）
- */
-export const ALLOWED_RUNNERS = ['flutter', 'vitest', 'pytest', 'jest'] as const;
-export type Runner = typeof ALLOWED_RUNNERS[number];
+// ランナー関連のエクスポートを再公開
+export { ALLOWED_RUNNERS, isAllowedRunner, type Runner };
 
 /**
  * テスト実行スコープ
@@ -41,12 +35,16 @@ const positiveIntSchema = z.number().int().positive({
 
 /**
  * run_test入力スキーマ（基本）
+ * 
+ * 注意: z.enum は [string, ...string[]] 型を要求するため、
+ * ランナー名を文字列として検証し、後でカスタムバリデーションで確認する
  */
 const baseRunTestInputSchema = z.object({
-  /** テストランナー（MVPでは flutter のみ） */
-  runner: z.enum(ALLOWED_RUNNERS, {
-    error: `runnerは ${ALLOWED_RUNNERS.join(', ')} のいずれかである必要があります`,
-  }),
+  /** テストランナー */
+  runner: z.string().refine(
+    (val) => isAllowedRunner(val),
+    { message: `runnerは ${ALLOWED_RUNNERS.join(', ')} のいずれかである必要があります` }
+  ),
 
   /** テスト実行スコープ */
   scope: z.enum(ALLOWED_SCOPES, {
@@ -133,16 +131,6 @@ export function validateRunTestInput(input: unknown): ValidationResult<RunTestIn
     success: false,
     errors,
   };
-}
-
-/**
- * ランナーが許可されているかチェック
- * 
- * @param runner - チェック対象のランナー
- * @returns 許可されている場合 true
- */
-export function isAllowedRunner(runner: string): runner is Runner {
-  return ALLOWED_RUNNERS.includes(runner as Runner);
 }
 
 /**

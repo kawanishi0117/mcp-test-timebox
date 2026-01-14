@@ -17,7 +17,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { createRunTestTool, type RunTestOutput } from './tools/run-test.js';
-import { ALLOWED_RUNNERS, ALLOWED_SCOPES } from './validation/input-schema.js';
+import { ALLOWED_RUNNERS, isAllowedRunner } from './runners/index.js';
+import { ALLOWED_SCOPES } from './validation/input-schema.js';
 
 /**
  * サーバ情報
@@ -36,7 +37,10 @@ const SERVER_INFO = {
  */
 const runTestInputShape = {
   /** テストランナー */
-  runner: z.enum(ALLOWED_RUNNERS).describe(
+  runner: z.string().refine(
+    (val) => isAllowedRunner(val),
+    { message: `runnerは ${ALLOWED_RUNNERS.join(', ')} のいずれかである必要があります` }
+  ).describe(
     `テストランナー。プロジェクトに応じて選択:
 - flutter: Flutter/Dartプロジェクト
 - vitest: Vite/TypeScript/JavaScriptプロジェクト

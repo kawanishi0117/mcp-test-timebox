@@ -11,6 +11,24 @@
  */
 
 /**
+ * ANSIエスケープシーケンスを除去する
+ * 
+ * ターミナルの色付けコード（ESC[...m）などを除去して、
+ * ファイル保存時の可読性を向上させる。
+ * 
+ * @param text - 入力テキスト
+ * @returns ANSIコードを除去したテキスト
+ */
+export function stripAnsi(text: string): string {
+  // ANSIエスケープシーケンスのパターン
+  // ESC[ ... m (SGR - Select Graphic Rendition)
+  // ESC[ ... その他の制御シーケンス
+  // eslint-disable-next-line no-control-regex
+  const ansiPattern = /\x1B\[[0-9;]*[A-Za-z]/g;
+  return text.replace(ansiPattern, '');
+}
+
+/**
  * 重要行抽出パターン
  * 
  * テスト失敗やエラーを示す一般的なパターン
