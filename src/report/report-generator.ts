@@ -271,9 +271,11 @@ export class ReportGenerator implements IReportGenerator {
     
     // ログエントリをフォーマット（Requirements 4.4）
     // フォーマット: [timestamp] [stream] data
+    // ANSIエスケープシーケンスを除去して可読性を向上
     const lines = entries.map((entry) => {
       const timestamp = formatTimestamp(entry.timestamp);
-      return `[${timestamp}] [${entry.stream}] ${entry.data}`;
+      const cleanData = stripAnsi(entry.data);
+      return `[${timestamp}] [${entry.stream}] ${cleanData}`;
     });
     
     const content = lines.join('');
