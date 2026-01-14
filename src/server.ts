@@ -25,7 +25,7 @@ import { ALLOWED_SCOPES } from './validation/input-schema.js';
  */
 const SERVER_INFO = {
   name: 'mcp-test-timebox',
-  version: '0.1.0',
+  version: '1.0.0',
   description: 'タイムボックス付きテスト専用MCPサーバ - テスト実行が終わらない問題を防ぐ',
 };
 

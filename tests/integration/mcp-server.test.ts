@@ -59,7 +59,7 @@ describe('MCPサーバ統合テスト', () => {
       const serverVersion = client.getServerVersion();
       expect(serverVersion).toBeDefined();
       expect(serverVersion?.name).toBe('mcp-test-timebox');
-      expect(serverVersion?.version).toBe('0.1.0');
+      expect(serverVersion?.version).toBe('1.0.0');
 
       // クリーンアップ
       await client.close();

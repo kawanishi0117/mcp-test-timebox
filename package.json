@@ -1,6 +1,6 @@
 {
   "name": "mcp-test-timebox",
-  "version": "0.1.14",
+  "version": "1.0.0",
   "description": "タイムボックス付きテスト専用MCPサーバ - テスト実行が終わらない問題を防ぐ",
   "type": "module",
   "main": "dist/server.js",
