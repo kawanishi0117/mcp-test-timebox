@@ -10,7 +10,8 @@
  * - 2.4: scope が file の場合、flutter test <target> を実行
  * - 2.5: scope が pattern の場合、flutter test --name <target> を実行
  */
-import type { Runner, Scope } from './input-schema.js';
+import { getRunner, type Runner } from '../runners/index.js';
+import type { Scope } from './input-schema.js';
 
 /**
  * コマンド構築結果
@@ -21,102 +22,6 @@ export interface CommandResult {
   /** コマンド引数 */
   args: string[];
 }
-
-/**
- * コマンドテンプレート定義
- * 
- * 各ランナーとスコープの組み合わせに対応するコマンドテンプレート
- */
-interface CommandTemplate {
-  /** 実行するコマンド */
-  command: string;
-  /** 基本引数 */
-  baseArgs: string[];
-  /** target引数の形式（targetが必要な場合） */
-  targetArgFormat?: 'positional' | 'named';
-  /** named形式の場合のフラグ名 */
-  targetFlag?: string;
-}
-
-/**
- * 許可されたコマンドテンプレート
- * 
- * runner -> scope -> template のマッピング
- */
-const COMMAND_TEMPLATES: Record<Runner, Record<Scope, CommandTemplate>> = {
-  // Flutter/Dart用
-  flutter: {
-    all: {
-      command: 'flutter',
-      baseArgs: ['test'],
-    },
-    file: {
-      command: 'flutter',
-      baseArgs: ['test'],
-      targetArgFormat: 'positional',
-    },
-    pattern: {
-      command: 'flutter',
-      baseArgs: ['test'],
-      targetArgFormat: 'named',
-      targetFlag: '--name',
-    },
-  },
-  // Vitest用（TypeScript/JavaScript）
-  vitest: {
-    all: {
-      command: 'npx',
-      baseArgs: ['vitest', 'run'],
-    },
-    file: {
-      command: 'npx',
-      baseArgs: ['vitest', 'run'],
-      targetArgFormat: 'positional',
-    },
-    pattern: {
-      command: 'npx',
-      baseArgs: ['vitest', 'run'],
-      targetArgFormat: 'named',
-      targetFlag: '-t',
-    },
-  },
-  // Pytest用（Python）
-  pytest: {
-    all: {
-      command: 'pytest',
-      baseArgs: [],
-    },
-    file: {
-      command: 'pytest',
-      baseArgs: [],
-      targetArgFormat: 'positional',
-    },
-    pattern: {
-      command: 'pytest',
-      baseArgs: [],
-      targetArgFormat: 'named',
-      targetFlag: '-k',
-    },
-  },
-  // Jest用（TypeScript/JavaScript）
-  jest: {
-    all: {
-      command: 'npx',
-      baseArgs: ['jest'],
-    },
-    file: {
-      command: 'npx',
-      baseArgs: ['jest'],
-      targetArgFormat: 'positional',
-    },
-    pattern: {
-      command: 'npx',
-      baseArgs: ['jest'],
-      targetArgFormat: 'named',
-      targetFlag: '-t',
-    },
-  },
-};
 
 /**
  * 入力パラメータからコマンドと引数を構築する
@@ -130,26 +35,26 @@ const COMMAND_TEMPLATES: Record<Runner, Record<Scope, CommandTemplate>> = {
  * @throws Error - 不正なパラメータの場合
  */
 export function buildCommand(
-  runner: Runner,
+  runner: string,
   scope: Scope,
   target?: string
 ): CommandResult {
-  // テンプレートを取得
-  const runnerTemplates = COMMAND_TEMPLATES[runner];
-  if (!runnerTemplates) {
+  // ランナー設定を取得
+  const runnerConfig = getRunner(runner);
+  if (!runnerConfig) {
     throw new Error(`許可されていないランナー: ${runner}`);
   }
 
-  const template = runnerTemplates[scope];
-  if (!template) {
+  const scopeConfig = runnerConfig.scopes[scope];
+  if (!scopeConfig) {
     throw new Error(`許可されていないスコープ: ${scope}`);
   }
 
   // 引数を構築
-  const args = [...template.baseArgs];
+  const args = [...scopeConfig.baseArgs];
 
   // targetが必要な場合
-  if (template.targetArgFormat) {
+  if (scopeConfig.targetArgFormat) {
     if (!target) {
       throw new Error(`scope '${scope}' の場合、target は必須です`);
     }
@@ -157,17 +62,17 @@ export function buildCommand(
     // targetの安全性チェック（シェルインジェクション防止）
     validateTarget(target);
 
-    if (template.targetArgFormat === 'positional') {
+    if (scopeConfig.targetArgFormat === 'positional') {
       // 位置引数として追加
       args.push(target);
-    } else if (template.targetArgFormat === 'named' && template.targetFlag) {
+    } else if (scopeConfig.targetArgFormat === 'named' && scopeConfig.targetFlag) {
       // 名前付き引数として追加
-      args.push(template.targetFlag, target);
+      args.push(scopeConfig.targetFlag, target);
     }
   }
 
   return {
-    command: template.command,
+    command: scopeConfig.command,
     args,
   };
 }

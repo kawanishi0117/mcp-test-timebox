@@ -56,14 +56,14 @@ describe('入力バリデーション プロパティテスト', () => {
   /**
    * Property 2: 許可されていないランナーの拒否
    * 
-   * *For any* `flutter` 以外の文字列が `runner` として渡されたとき、
+   * *For any* 許可されていない文字列が `runner` として渡されたとき、
    * Run_Test_Tool はエラーを返す。
    * 
    * Validates: Requirements 2.2, 7.1
    */
   describe('Property 2: 許可されていないランナーの拒否', () => {
-    it('flutter以外のランナーはエラーを返す', () => {
-      // flutter以外の文字列を生成
+    it('許可されていないランナーはエラーを返す', () => {
+      // 許可されていない文字列を生成
       const invalidRunner = fc.string({ minLength: 1 })
         .filter((s) => !ALLOWED_RUNNERS.includes(s as typeof ALLOWED_RUNNERS[number]));
 
@@ -92,7 +92,7 @@ describe('入力バリデーション プロパティテスト', () => {
       );
     });
 
-    it('isAllowedRunner()はflutter以外でfalseを返す', () => {
+    it('isAllowedRunner()は許可されていないランナーでfalseを返す', () => {
       const invalidRunner = fc.string({ minLength: 1 })
         .filter((s) => !ALLOWED_RUNNERS.includes(s as typeof ALLOWED_RUNNERS[number]));
 
